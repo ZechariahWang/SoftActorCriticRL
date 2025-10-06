@@ -1,6 +1,11 @@
 import torch
 from torch import nn as nn
 
+"""
+Found this online:
+Unlike standard RL methods that train a single Q-network and often suffer from overestimation errors, SAC trains two Q-networks and uses their minimum prediction for stability. This dual critic approach provides more reliable value estimates, leading to smoother and more efficient policy learning.
+"""
+
 # this class just makes the standard multi-layer perceptron
 class MLP(nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dims, layer_size, activation=nn.ReLU, activation_last = nn.Identity):
@@ -75,6 +80,8 @@ class ActionNetwork(nn.Module):
 
 
 """
+this will be the target network
+
 in training: 
 with torch.no_grad():
     next_action, next_log_prob, _, _ = actor(next_state)
@@ -83,6 +90,9 @@ with torch.no_grad():
     min_q_next = torch.min(q1_next, q2_next)
     v_next = min_q_next - alpha * next_log_prob.unsqueeze(-1)
     target_q = reward + gamma * (1 - done) * v_next
+
+found a comment on reddit: If you don't have a target network, then you are basically feeding in very noisy model's erroneous predictions into itself as pure exogenous values, which is simply wrong.
+This will act as our on the fly target network
 """
 
 """
